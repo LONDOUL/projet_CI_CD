@@ -38,19 +38,3 @@ jobs:
             Merci de réviser et valider.
           base: main
           branch: dev
-
-      - name: Push build to prod branch
-        if: success()
-        run: |
-          # Switch to the 'main' branch and ensure it is up to date
-          git checkout main
-          git pull origin main
-
-          # Create a new commit with the build output and push it to 'prod'
-          git checkout -b prod
-          git add dist/
-          git commit -m "🚀 Mise à jour de la version production"
-          git push origin prod
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
