@@ -2,20 +2,20 @@ name: Angular CI/CD
 
 on:
   push:
-    branches: [dev] # Déclenchement à chaque push sur 'dev'
+    branches: [dev] # Se déclenche à chaque push sur dev
 
 jobs:
-  build-test-and-merge:
+  build-and-create-pr:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20 # Compatible avec ton Node.js local
+          node-version: 20
 
       - name: Install dependencies
         run: npm ci
@@ -26,15 +26,15 @@ jobs:
       - name: Build Angular app
         run: npm run build -- --configuration production
 
-      - name: Merge dev -> main (if success)
+      - name: Create Pull Request to main
         if: success()
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-          git fetch origin main
-          git checkout main
-          git merge origin/dev --no-ff -m "✅ CI/CD auto-merge: dev -> main"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "🚀 Auto PR: Mise à jour depuis dev"
+          title: "🔄 Fusion automatique : dev → main"
+          body: |
+            Ce pull request a été créé automatiquement suite au passage des tests sur `dev`.
+            Merci de réviser et valider.
+          base: main
+          branch: dev
